@@ -1,4 +1,3 @@
-const CIRCUMFERENCE=2*Math.PI*94;
 const THEMES={
   alpine:['#2b77c5','#205f9d','#3a9b78','#eef5fd','#d6e3f2','#17324b','#627589'],
   forest:['#2f7c5d','#255f48','#5e8d35','#eef5ef','#d8e5db','#21382d','#69796e'],
@@ -8,12 +7,13 @@ const THEMES={
 };
 const DEFAULTS={workMinutes:25,breakMinutes:5,totalSets:4,alarmSound:'classic',birdSound:'uguisu',theme:'alpine',soundEnabled:true,notificationsEnabled:false};
 const $=id=>document.getElementById(id);
-const els={timerView:$('timerView'),settingsView:$('settingsView'),settingsToggle:$('settingsToggle'),phaseLabel:$('phaseLabel'),setLabel:$('setLabel'),timeDisplay:$('timeDisplay'),statusText:$('statusText'),ring:$('ringProgress'),start:$('startPauseButton'),reset:$('resetButton'),skip:$('skipButton'),form:$('settingsForm'),work:$('workMinutes'),break:$('breakMinutes'),sets:$('totalSets'),alarm:$('alarmSound'),bird:$('birdSound'),sound:$('soundEnabled'),notifications:$('notificationsEnabled'),testSound:$('testSound'),testBird:$('testBird')};
+const els={timerView:$('timerView'),settingsView:$('settingsView'),settingsToggle:$('settingsToggle'),phaseLabel:$('phaseLabel'),setLabel:$('setLabel'),timeDisplay:$('timeDisplay'),start:$('startPauseButton'),reset:$('resetButton'),skip:$('skipButton'),form:$('settingsForm'),work:$('workMinutes'),break:$('breakMinutes'),sets:$('totalSets'),alarm:$('alarmSound'),bird:$('birdSound'),sound:$('soundEnabled'),notifications:$('notificationsEnabled'),testSound:$('testSound'),testBird:$('testBird')};
 
 const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}};
 let settings={...DEFAULTS,...read('pomodoro-settings',{})};
 const initialTimer=()=>({status:'idle',phase:'work',currentSet:1,remainingSeconds:settings.workMinutes*60,endTime:null});
 let timer={...initialTimer(),...read('pomodoro-timer',{})};
+if(timer.status==='paused')timer.status='idle';
 let showingSettings=false,advancing=false,audioContext;
 
 function save(){localStorage.setItem('pomodoro-settings',JSON.stringify(settings));localStorage.setItem('pomodoro-timer',JSON.stringify(timer))}
@@ -23,17 +23,16 @@ function format(seconds){const value=Math.max(0,Math.ceil(seconds));return `${St
 function applyTheme(name){const values=THEMES[name]||THEMES.alpine;['--accent','--dark','--break','--soft','--line','--ink','--muted'].forEach((key,index)=>document.documentElement.style.setProperty(key,values[index]));document.querySelector('meta[name="theme-color"]').content=values[0]}
 
 function render(){
-  const left=remaining(),progress=Math.min(1,left/Math.max(1,duration()));
-  els.timeDisplay.textContent=format(left);els.phaseLabel.textContent=timer.phase==='work'?'作業':'休憩';els.setLabel.textContent=`セット ${timer.currentSet} / ${settings.totalSets}`;
-  els.statusText.textContent=timer.status==='running'?(timer.phase==='work'?'集中しています':'休憩しています'):timer.status==='paused'?'一時停止中':timer.status==='complete'?'全セット完了':'準備完了';
-  els.start.textContent=timer.status==='running'?'一時停止':timer.status==='complete'?'もう一度':'スタート';els.skip.disabled=timer.status==='complete';
-  els.phaseLabel.classList.toggle('break',timer.phase==='break');els.ring.classList.toggle('break',timer.phase==='break');els.ring.style.strokeDasharray=CIRCUMFERENCE;els.ring.style.strokeDashoffset=CIRCUMFERENCE*(1-progress);
+  const left=remaining();
+  els.timeDisplay.textContent=format(left);els.phaseLabel.textContent=timer.phase==='work'?'作業':'休憩';els.setLabel.textContent=`${timer.currentSet} / ${settings.totalSets} セット`;
+  els.start.textContent=timer.status==='running'?'計測中':timer.status==='complete'?'もう一度':'スタート';els.start.disabled=timer.status==='running';els.skip.disabled=timer.status==='complete';
+  els.phaseLabel.classList.toggle('break',timer.phase==='break');
   document.title=`${format(left)} - ${timer.phase==='work'?'作業':'休憩'}`;
   if(timer.status==='running'&&left<=0&&!advancing){advancing=true;advance().finally(()=>advancing=false)}
 }
 
 function fillForm(){els.work.value=settings.workMinutes;els.break.value=settings.breakMinutes;els.sets.value=settings.totalSets;els.alarm.value=settings.alarmSound;els.bird.value=settings.birdSound;els.sound.checked=settings.soundEnabled;els.notifications.checked=settings.notificationsEnabled;document.querySelectorAll('[name="theme"]').forEach(input=>input.checked=input.value===settings.theme)}
-function toggleSettings(show){showingSettings=show;els.timerView.hidden=show;els.settingsView.hidden=!show;els.settingsToggle.textContent=show?'戻る':'設定';if(show)fillForm()}
+function toggleSettings(show){showingSettings=show;els.timerView.hidden=show;els.settingsView.hidden=!show;els.settingsToggle.textContent=show?'← 戻る':'設定';if(show)fillForm()}
 
 async function getAudio(){audioContext||=new AudioContext();if(audioContext.state==='suspended')await audioContext.resume();return audioContext}
 function tone(context,{at=0,from,to=from,length=.15,type='sine',volume=.08}){const start=context.currentTime+.02+at,osc=context.createOscillator(),gain=context.createGain();osc.type=type;osc.frequency.setValueAtTime(from,start);osc.frequency.exponentialRampToValueAtTime(to,start+length);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(volume,start+.01);gain.gain.exponentialRampToValueAtTime(.0001,start+length);osc.connect(gain).connect(context.destination);osc.start(start);osc.stop(start+length+.02)}
@@ -45,11 +44,12 @@ async function announce(completedPhase,completedSet,isComplete){if(settings.soun
 async function advance(){const completedPhase=timer.phase,completedSet=timer.currentSet;let complete=false;if(completedPhase==='work'&&completedSet>=settings.totalSets){complete=true;timer={status:'complete',phase:'work',currentSet:settings.totalSets,remainingSeconds:0,endTime:null}}else{const phase=completedPhase==='work'?'break':'work',currentSet=completedPhase==='work'?completedSet:completedSet+1,seconds=duration(phase);timer={status:'running',phase,currentSet,remainingSeconds:seconds,endTime:Date.now()+seconds*1000}}save();render();await announce(completedPhase,completedSet,complete)}
 
 els.settingsToggle.addEventListener('click',()=>toggleSettings(!showingSettings));
-els.start.addEventListener('click',async()=>{if(settings.soundEnabled)getAudio();if(timer.status==='running'){timer={...timer,status:'paused',remainingSeconds:remaining(),endTime:null}}else{if(timer.status==='complete')timer=initialTimer();const seconds=Math.max(1,timer.remainingSeconds||duration());timer={...timer,status:'running',remainingSeconds:seconds,endTime:Date.now()+seconds*1000}}save();render()});
+els.start.addEventListener('click',async()=>{if(timer.status==='running')return;if(settings.soundEnabled)getAudio();if(timer.status==='complete')timer=initialTimer();const seconds=Math.max(1,timer.remainingSeconds||duration());timer={...timer,status:'running',remainingSeconds:seconds,endTime:Date.now()+seconds*1000};save();render()});
 els.reset.addEventListener('click',()=>{timer=initialTimer();save();render()});
 els.skip.addEventListener('click',()=>{if(timer.status!=='complete')advance()});
 els.testSound.addEventListener('click',()=>playAlarm(els.alarm.value));els.testBird.addEventListener('click',()=>playBird(els.bird.value));
 document.querySelectorAll('[name="theme"]').forEach(input=>input.addEventListener('change',()=>{if(input.checked)applyTheme(input.value)}));
+document.querySelectorAll('.step-button').forEach(button=>button.addEventListener('click',()=>{const input=$(button.dataset.target),min=+input.min,max=+input.max,current=+input.value||min;input.value=Math.min(max,Math.max(min,current+(+button.dataset.delta)))}));
 els.form.addEventListener('submit',async event=>{event.preventDefault();settings={workMinutes:+els.work.value,breakMinutes:+els.break.value,totalSets:+els.sets.value,alarmSound:els.alarm.value,birdSound:els.bird.value,theme:document.querySelector('[name="theme"]:checked')?.value||'alpine',soundEnabled:els.sound.checked,notificationsEnabled:els.notifications.checked};if(settings.notificationsEnabled&&'Notification'in window&&Notification.permission==='default')await Notification.requestPermission();timer=initialTimer();save();applyTheme(settings.theme);toggleSettings(false);render()});
 
 applyTheme(settings.theme);fillForm();render();setInterval(render,250);

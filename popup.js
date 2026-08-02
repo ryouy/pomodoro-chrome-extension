@@ -1,5 +1,3 @@
-const CIRCUMFERENCE = 2 * Math.PI * 94;
-
 const THEMES = {
   alpine: {
     accent: '#2b77c5',
@@ -60,8 +58,6 @@ const elements = {
   phaseLabel: document.getElementById('phaseLabel'),
   setLabel: document.getElementById('setLabel'),
   timeDisplay: document.getElementById('timeDisplay'),
-  statusText: document.getElementById('statusText'),
-  ringProgress: document.getElementById('ringProgress'),
   startPauseButton: document.getElementById('startPauseButton'),
   resetButton: document.getElementById('resetButton'),
   skipButton: document.getElementById('skipButton'),
@@ -100,19 +96,6 @@ function getRemainingSeconds(timer) {
   return Math.max(0, timer.remainingSeconds);
 }
 
-function phaseDurationSeconds() {
-  return (state.timer.phase === 'work'
-    ? state.settings.workMinutes
-    : state.settings.breakMinutes) * 60;
-}
-
-function statusCopy(timer) {
-  if (timer.status === 'running') return timer.phase === 'work' ? '集中しています' : '休憩しています';
-  if (timer.status === 'paused') return '一時停止中';
-  if (timer.status === 'complete') return '全セット完了';
-  return '準備完了';
-}
-
 function applyTheme(themeName = 'alpine') {
   const theme = THEMES[themeName] || THEMES.alpine;
   const root = document.documentElement;
@@ -132,22 +115,17 @@ function renderTimer() {
 
   const { settings, timer } = state;
   const remaining = getRemainingSeconds(timer);
-  const duration = Math.max(1, phaseDurationSeconds());
-  const progress = Math.min(1, Math.max(0, remaining / duration));
 
   elements.timeDisplay.textContent = formatTime(remaining);
   elements.phaseLabel.textContent = timer.phase === 'work' ? '作業' : '休憩';
-  elements.setLabel.textContent = `セット ${timer.currentSet} / ${settings.totalSets}`;
-  elements.statusText.textContent = statusCopy(timer);
+  elements.setLabel.textContent = `${timer.currentSet} / ${settings.totalSets} セット`;
   elements.startPauseButton.textContent = timer.status === 'running'
-    ? '一時停止'
+    ? '計測中'
     : timer.status === 'complete' ? 'もう一度' : 'スタート';
+  elements.startPauseButton.disabled = timer.status === 'running';
   elements.skipButton.disabled = timer.status === 'complete';
 
   elements.phaseLabel.classList.toggle('break', timer.phase === 'break');
-  elements.ringProgress.classList.toggle('break', timer.phase === 'break');
-  elements.ringProgress.style.strokeDasharray = `${CIRCUMFERENCE}`;
-  elements.ringProgress.style.strokeDashoffset = `${CIRCUMFERENCE * (1 - progress)}`;
 
   document.title = `${formatTime(remaining)} - ${timer.phase === 'work' ? '作業' : '休憩'}`;
 
@@ -183,7 +161,7 @@ function setSettingsVisibility(visible) {
   showingSettings = visible;
   elements.timerView.hidden = visible;
   elements.settingsView.hidden = !visible;
-  elements.settingsToggle.textContent = visible ? '戻る' : '設定';
+  elements.settingsToggle.textContent = visible ? '← 戻る' : '設定';
   elements.settingsToggle.setAttribute('aria-expanded', String(visible));
   if (visible) fillSettingsForm();
 }
@@ -211,8 +189,8 @@ document.querySelectorAll('.step-button').forEach((button) => {
 });
 
 elements.startPauseButton.addEventListener('click', async () => {
-  const type = state.timer.status === 'running' ? 'PAUSE' : 'START';
-  await sendMessage({ type });
+  if (state.timer.status === 'running') return;
+  await sendMessage({ type: 'START' });
   await refreshState();
 });
 

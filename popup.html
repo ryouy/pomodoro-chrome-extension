@@ -9,42 +9,32 @@
 <body>
   <main class="app">
     <header class="header">
-      <div>
-        <p class="eyebrow">POMODORO TIMER</p>
-        <h2>集中タイマー</h2>
-      </div>
+      <h1>集中タイマー</h1>
       <button id="settingsToggle" class="icon-button" type="button" aria-label="設定を開く" aria-expanded="false">設定</button>
     </header>
 
     <section id="timerView">
-      <div class="status-row">
-        <span id="phaseLabel" class="phase-badge">作業</span>
-        <span id="setLabel" class="set-label">セット 1 / 4</span>
-      </div>
+      <div class="phase-row"><span id="phaseLabel" class="phase-label">作業</span></div>
 
-      <div class="timer-ring" aria-live="polite">
-        <svg viewBox="0 0 220 220" aria-hidden="true">
-          <circle class="ring-track" cx="110" cy="110" r="94"></circle>
-          <circle id="ringProgress" class="ring-progress" cx="110" cy="110" r="94"></circle>
-        </svg>
-        <div class="timer-content">
-          <div id="timeDisplay" class="time-display">25:00</div>
-          <div id="statusText" class="status-text">準備完了</div>
-        </div>
+      <div class="timer-block" aria-live="polite">
+        <div id="timeDisplay" class="time-display">25:00</div>
+        <div id="setLabel" class="set-label">1 / 4 セット</div>
       </div>
 
       <div class="primary-actions">
         <button id="startPauseButton" class="primary-button" type="button">スタート</button>
-        <button id="resetButton" class="secondary-button" type="button">リセット</button>
       </div>
-      <button id="skipButton" class="text-button" type="button">この区間をスキップ</button>
+      <div class="secondary-actions">
+        <button id="resetButton" class="text-button" type="button">リセット</button>
+        <button id="skipButton" class="text-button" type="button">スキップ</button>
+      </div>
     </section>
 
     <section id="settingsView" class="settings-panel" hidden>
       <div class="settings-heading">
         <h2>設定</h2>
         <span class="settings-heading-meta">
-          <a href="https://simple-pomodoro-web.vercel.app" target="_blank" rel="noopener noreferrer">ウェブ版はこちら ↗</a>
+          <a href="https://pomodoro-chrome-extension.vercel.app/" target="_blank" rel="noopener noreferrer">ウェブ版はこちら ↗</a>
           <small>変更後はタイマーをリセット</small>
         </span>
       </div>
@@ -92,7 +82,7 @@
               <option value="bell">ベル</option>
               <option value="crystal">クリスタル</option>
             </select>
-              <button id="testSoundButton" class="test-button" type="button" aria-label="アラーム音を試聴">試聴</button>
+              <button id="testSoundButton" class="test-button" type="button" aria-label="アラーム音を試聴" title="試聴">▶</button>
             </span>
           </label>
           <label class="compact-field">
@@ -105,7 +95,7 @@
                 <option value="cuckoo">カッコウ</option>
                 <option value="sparrow">スズメ</option>
               </select>
-              <button id="testBirdButton" class="test-button" type="button" aria-label="鳥の声を試聴">試聴</button>
+              <button id="testBirdButton" class="test-button" type="button" aria-label="鳥の声を試聴" title="試聴">▶</button>
             </span>
           </label>
         </div>

@@ -5,6 +5,6 @@
       <stop offset="1" stop-color="#78C39B"/>
     </linearGradient>
   </defs>
-  <rect x="3" y="3" width="122" height="122" rx="34" fill="#2B77C5"/>
+  <rect width="128" height="128" fill="#2B77C5"/>
   <path d="M12 103 53 40c3-4 7-4 10 0l17 26 8-11c2-3 6-3 8 0l22 48Z" fill="url(#mountain)"/>
 </svg>

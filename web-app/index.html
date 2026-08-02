@@ -11,42 +11,38 @@
 <body>
   <main class="app">
     <header class="header">
-      <div><p class="eyebrow">POMODORO TIMER</p><h1>集中タイマー</h1></div>
+      <h1>集中タイマー</h1>
       <button id="settingsToggle" class="link-button" type="button">設定</button>
     </header>
 
     <section id="timerView">
-      <div class="status-row"><span id="phaseLabel" class="phase-badge">作業</span><span id="setLabel">セット 1 / 4</span></div>
-      <div class="timer-ring" aria-live="polite">
-        <svg viewBox="0 0 220 220" aria-hidden="true">
-          <circle class="ring-track" cx="110" cy="110" r="94"/>
-          <circle id="ringProgress" class="ring-progress" cx="110" cy="110" r="94"/>
-        </svg>
-        <div class="timer-content"><div id="timeDisplay" class="time-display">25:00</div><div id="statusText">準備完了</div></div>
+      <div class="phase-row"><span id="phaseLabel" class="phase-label">作業</span></div>
+      <div class="timer-block" aria-live="polite">
+        <div id="timeDisplay" class="time-display">25:00</div><div id="setLabel" class="set-label">1 / 4 セット</div>
       </div>
       <div class="primary-actions">
         <button id="startPauseButton" class="primary-button" type="button">スタート</button>
-        <button id="resetButton" class="secondary-button" type="button">リセット</button>
       </div>
-      <button id="skipButton" class="link-button skip-button" type="button">この区間をスキップ</button>
+      <div class="secondary-actions">
+        <button id="resetButton" class="link-button" type="button">リセット</button>
+        <button id="skipButton" class="link-button" type="button">スキップ</button>
+      </div>
     </section>
 
     <section id="settingsView" hidden>
       <div class="settings-heading"><h2>設定</h2><small>変更後はタイマーをリセット</small></div>
       <form id="settingsForm">
         <div class="setting-section">
-          <strong>タイマー</strong>
           <div class="duration-grid">
-            <label>作業<span><input id="workMinutes" type="number" min="1" max="180" required><small>分</small></span></label>
-            <label>休憩<span><input id="breakMinutes" type="number" min="1" max="60" required><small>分</small></span></label>
-            <label>セット<span><input id="totalSets" type="number" min="1" max="12" required><small>回</small></span></label>
+            <label><span class="duration-label">作業 <small>分</small></span><span class="number-stepper"><button class="step-button" type="button" data-target="workMinutes" data-delta="-1" aria-label="作業時間を減らす">−</button><input id="workMinutes" type="number" min="1" max="180" required aria-label="作業時間（分）"><button class="step-button" type="button" data-target="workMinutes" data-delta="1" aria-label="作業時間を増やす">＋</button></span></label>
+            <label><span class="duration-label">休憩 <small>分</small></span><span class="number-stepper"><button class="step-button" type="button" data-target="breakMinutes" data-delta="-1" aria-label="休憩時間を減らす">−</button><input id="breakMinutes" type="number" min="1" max="60" required aria-label="休憩時間（分）"><button class="step-button" type="button" data-target="breakMinutes" data-delta="1" aria-label="休憩時間を増やす">＋</button></span></label>
+            <label><span class="duration-label">セット <small>回</small></span><span class="number-stepper"><button class="step-button" type="button" data-target="totalSets" data-delta="-1" aria-label="セット数を減らす">−</button><input id="totalSets" type="number" min="1" max="12" required aria-label="セット数（回）"><button class="step-button" type="button" data-target="totalSets" data-delta="1" aria-label="セット数を増やす">＋</button></span></label>
           </div>
         </div>
 
         <div class="setting-section sound-settings">
-          <strong>音</strong>
-          <label class="setting-row">終了音<span><select id="alarmSound"><option value="classic">クラシック</option><option value="digital">デジタル</option><option value="gentle">ジェントル</option><option value="bell">ベル</option><option value="crystal">クリスタル</option></select><button id="testSound" type="button">試聴</button></span></label>
-          <label class="setting-row">休憩音<span><select id="birdSound"><option value="uguisu">ウグイス</option><option value="robin">コマドリ</option><option value="tit">シジュウカラ</option><option value="cuckoo">カッコウ</option><option value="sparrow">スズメ</option></select><button id="testBird" type="button">試聴</button></span></label>
+          <label class="setting-row">終了音<span><select id="alarmSound"><option value="classic">クラシック</option><option value="digital">デジタル</option><option value="gentle">ジェントル</option><option value="bell">ベル</option><option value="crystal">クリスタル</option></select><button id="testSound" type="button" aria-label="終了音を試聴">▶</button></span></label>
+          <label class="setting-row">休憩音<span><select id="birdSound"><option value="uguisu">ウグイス</option><option value="robin">コマドリ</option><option value="tit">シジュウカラ</option><option value="cuckoo">カッコウ</option><option value="sparrow">スズメ</option></select><button id="testBird" type="button" aria-label="休憩音を試聴">▶</button></span></label>
         </div>
 
         <div class="setting-section theme-row">
@@ -69,8 +65,8 @@
     </section>
 
     <footer class="download-area">
-      <button id="downloadExtension" class="download-button" type="button">Chrome拡張機能をダウンロード</button>
-      <small>ZIPを展開してChromeに読み込めます</small>
+      <button id="downloadExtension" class="download-button" type="button">Chrome拡張機能をダウンロード ↓</button>
+
     </footer>
   </main>
   <script src="download.js"></script>

@@ -50,7 +50,8 @@ function normalizeSettings(raw = {}) {
 async function getStoredData() {
   const stored = await chrome.storage.local.get(['settings', 'timer']);
   const settings = normalizeSettings({ ...DEFAULT_SETTINGS, ...(stored.settings || {}) });
-  const timer = stored.timer || initialTimer(settings);
+  const storedTimer = stored.timer || initialTimer(settings);
+  const timer = storedTimer.status === 'paused' ? { ...storedTimer, status: 'idle' } : storedTimer;
   return { settings, timer };
 }
 
@@ -78,8 +79,6 @@ async function updateBadge(settings, timer) {
     title = timer.phase === 'work'
       ? `作業中：セット ${setNumber}/${settings.totalSets}`
       : `休憩中：セット ${setNumber}/${settings.totalSets}`;
-  } else if (timer.status === 'paused') {
-    title = `一時停止中：${timer.phase === 'work' ? '作業' : '休憩'} セット ${setNumber}/${settings.totalSets}`;
   } else if (timer.status === 'complete') {
     title = `全${settings.totalSets}セット完了`;
   } else {
@@ -287,24 +286,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             };
 
         await scheduleTimerAlarm(nextTimer.endTime);
-        await saveData(settings, nextTimer);
-        sendResponse({ ok: true, timer: nextTimer });
-        break;
-      }
-
-      case 'PAUSE': {
-        if (timer.status !== 'running') {
-          sendResponse({ ok: true });
-          break;
-        }
-
-        const nextTimer = {
-          ...timer,
-          status: 'paused',
-          remainingSeconds: liveRemaining(timer),
-          endTime: null
-        };
-        await chrome.alarms.clear(TIMER_ALARM);
         await saveData(settings, nextTimer);
         sendResponse({ ok: true, timer: nextTimer });
         break;
