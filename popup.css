@@ -76,8 +76,8 @@ h1, h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
 
 .set-label { margin-top: 12px; color: var(--muted); font-size: 12px; font-weight: 650; }
 
-.primary-actions { display: block; }
-.primary-actions .primary-button { width: 100%; }
+.primary-actions { display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px; }
+.primary-actions .primary-button, .primary-actions .secondary-button { width: 100%; }
 
 .primary-button, .secondary-button {
   min-height: 44px;
@@ -89,6 +89,7 @@ h1, h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
 .primary-button:hover { border-color: var(--accent-dark); background: var(--accent-dark); }
 .secondary-button { border: 1px solid var(--line); color: var(--ink); background: #fff; }
 .secondary-button:hover { background: var(--surface-soft); }
+.primary-actions button:disabled { cursor: default; opacity: .45; }
 
 .secondary-actions { display: flex; justify-content: center; margin-top: 10px; }
 .secondary-actions .text-button { margin: 0; padding: 5px 14px; }

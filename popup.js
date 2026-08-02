@@ -59,6 +59,7 @@ const elements = {
   setLabel: document.getElementById('setLabel'),
   timeDisplay: document.getElementById('timeDisplay'),
   startPauseButton: document.getElementById('startPauseButton'),
+  pauseButton: document.getElementById('pauseButton'),
   resetButton: document.getElementById('resetButton'),
   skipButton: document.getElementById('skipButton'),
   settingsForm: document.getElementById('settingsForm'),
@@ -120,9 +121,10 @@ function renderTimer() {
   elements.phaseLabel.textContent = timer.phase === 'work' ? '作業' : '休憩';
   elements.setLabel.textContent = `${timer.currentSet} / ${settings.totalSets} セット`;
   elements.startPauseButton.textContent = timer.status === 'running'
-    ? '計測中'
-    : timer.status === 'complete' ? 'もう一度' : 'スタート';
+    ? timer.phase === 'work' ? '作業中' : '休憩中'
+    : timer.status === 'complete' ? 'もう一度' : timer.status === 'paused' ? '再開' : 'スタート';
   elements.startPauseButton.disabled = timer.status === 'running';
+  elements.pauseButton.disabled = timer.status !== 'running';
   elements.skipButton.disabled = timer.status === 'complete';
 
   elements.phaseLabel.classList.toggle('break', timer.phase === 'break');
@@ -191,6 +193,12 @@ document.querySelectorAll('.step-button').forEach((button) => {
 elements.startPauseButton.addEventListener('click', async () => {
   if (state.timer.status === 'running') return;
   await sendMessage({ type: 'START' });
+  await refreshState();
+});
+
+elements.pauseButton.addEventListener('click', async () => {
+  if (state.timer.status !== 'running') return;
+  await sendMessage({ type: 'PAUSE' });
   await refreshState();
 });
 

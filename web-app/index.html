@@ -22,6 +22,7 @@
       </div>
       <div class="primary-actions">
         <button id="startPauseButton" class="primary-button" type="button">スタート</button>
+        <button id="pauseButton" class="secondary-button" type="button" disabled>一時停止</button>
       </div>
       <div class="secondary-actions">
         <button id="resetButton" class="link-button" type="button">リセット</button>
@@ -41,7 +42,7 @@
         </div>
 
         <div class="setting-section sound-settings">
-          <label class="setting-row">終了音<span><select id="alarmSound"><option value="classic">クラシック</option><option value="digital">デジタル</option><option value="gentle">ジェントル</option><option value="bell">ベル</option><option value="crystal">クリスタル</option></select><button id="testSound" type="button" aria-label="終了音を試聴">▶</button></span></label>
+          <label class="setting-row">開始音<span><select id="alarmSound"><option value="classic">クラシック</option><option value="digital">デジタル</option><option value="gentle">ジェントル</option><option value="bell">ベル</option><option value="crystal">クリスタル</option></select><button id="testSound" type="button" aria-label="開始音を試聴">▶</button></span></label>
           <label class="setting-row">休憩音<span><select id="birdSound"><option value="uguisu">ウグイス</option><option value="robin">コマドリ</option><option value="tit">シジュウカラ</option><option value="cuckoo">カッコウ</option><option value="sparrow">スズメ</option></select><button id="testBird" type="button" aria-label="休憩音を試聴">▶</button></span></label>
         </div>
 
@@ -66,7 +67,7 @@
 
     <footer class="download-area">
       <button id="downloadExtension" class="download-button" type="button">Chrome拡張機能をダウンロード ↓</button>
-
+      <a class="github-button" href="https://github.com/ryouy/pomodoro-chrome-extension" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
     </footer>
   </main>
   <script src="download.js"></script>

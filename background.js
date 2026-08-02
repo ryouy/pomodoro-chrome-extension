@@ -50,8 +50,7 @@ function normalizeSettings(raw = {}) {
 async function getStoredData() {
   const stored = await chrome.storage.local.get(['settings', 'timer']);
   const settings = normalizeSettings({ ...DEFAULT_SETTINGS, ...(stored.settings || {}) });
-  const storedTimer = stored.timer || initialTimer(settings);
-  const timer = storedTimer.status === 'paused' ? { ...storedTimer, status: 'idle' } : storedTimer;
+  const timer = stored.timer || initialTimer(settings);
   return { settings, timer };
 }
 
@@ -81,18 +80,12 @@ async function updateBadge(settings, timer) {
       : `休憩中：セット ${setNumber}/${settings.totalSets}`;
   } else if (timer.status === 'complete') {
     title = `全${settings.totalSets}セット完了`;
-  } else if (completedSet >= settings.totalSets) {
-    isComplete = true;
-    nextTimer = {
-      status: 'complete',
-      phase: 'work',
-      currentSet: settings.totalSets,
-      remainingSeconds: 0,
-      endTime: null
-    };
-    await chrome.alarms.clear(TIMER_ALARM);
+  } else if (timer.status === 'paused') {
+    title = timer.phase === 'work'
+      ? `作業を一時停止中：セット ${setNumber}/${settings.totalSets}`
+      : `休憩を一時停止中：セット ${setNumber}/${settings.totalSets}`;
   } else {
-    title = `準備完了：作業 セット ${setNumber}/${settings.totalSets}`;
+    title = `準備完了：${timer.phase === 'break' ? '休憩' : '作業'} セット ${setNumber}/${settings.totalSets}`;
   }
 
   await chrome.action.setBadgeText({ text: '' });
@@ -116,7 +109,7 @@ async function ensureOffscreenDocument() {
   await chrome.offscreen.createDocument({
     url: OFFSCREEN_URL,
     reasons: ['AUDIO_PLAYBACK'],
-    justification: 'ポモドーロの作業・休憩終了時にアラーム音を再生するため'
+    justification: 'ポモドーロの作業・休憩開始時に音を再生するため'
   });
 }
 
@@ -125,11 +118,11 @@ async function playSound(soundId) {
     await ensureOffscreenDocument();
     await chrome.runtime.sendMessage({ target: 'offscreen', type: 'PLAY_SOUND', soundId });
   } catch (error) {
-    console.error('アラーム音を再生できませんでした。', error);
+    console.error('音を再生できませんでした。', error);
   }
 }
 
-async function playSelectedAlarm(settings) {
+async function playSelectedStartSound(settings) {
   await playSound(settings.alarmSound || DEFAULT_SETTINGS.alarmSound);
 }
 
@@ -154,13 +147,11 @@ async function showNotification(title, message) {
 }
 
 async function announceTransition(settings, completedPhase, completedSet, isComplete) {
-  if (settings.soundEnabled) {
-    if (isComplete) {
-      await playSelectedAlarm(settings);
-    } else if (completedPhase === 'work') {
+  if (settings.soundEnabled && !isComplete) {
+    if (completedPhase === 'work') {
       await playBreakBirdSound(settings.birdSound);
     } else {
-      await playSelectedAlarm(settings);
+      await playSelectedStartSound(settings);
     }
   }
 
@@ -297,6 +288,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
         await scheduleTimerAlarm(nextTimer.endTime);
         await saveData(settings, nextTimer);
+        if (settings.soundEnabled) {
+          await playSelectedStartSound(settings);
+        }
         sendResponse({ ok: true, timer: nextTimer });
         break;
       }
@@ -304,6 +298,24 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       case 'RESET': {
         await chrome.alarms.clear(TIMER_ALARM);
         const nextTimer = initialTimer(settings);
+        await saveData(settings, nextTimer);
+        sendResponse({ ok: true, timer: nextTimer });
+        break;
+      }
+
+      case 'PAUSE': {
+        if (timer.status !== 'running') {
+          sendResponse({ ok: true, timer });
+          break;
+        }
+
+        await chrome.alarms.clear(TIMER_ALARM);
+        const nextTimer = {
+          ...timer,
+          status: 'paused',
+          remainingSeconds: liveRemaining(timer),
+          endTime: null
+        };
         await saveData(settings, nextTimer);
         sendResponse({ ok: true, timer: nextTimer });
         break;

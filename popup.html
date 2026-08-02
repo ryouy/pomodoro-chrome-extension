@@ -23,6 +23,7 @@
 
       <div class="primary-actions">
         <button id="startPauseButton" class="primary-button" type="button">スタート</button>
+        <button id="pauseButton" class="secondary-button" type="button" disabled>一時停止</button>
       </div>
       <div class="secondary-actions">
         <button id="resetButton" class="text-button" type="button">リセット</button>
@@ -72,7 +73,7 @@
         <div class="compact-section sound-section">
           
           <label class="compact-field">
-            <span>終了音</span>
+            <span>開始音</span>
             <span class="select-with-test">
             <select id="alarmSound">
               <option value="classic">クラシック</option>
@@ -81,7 +82,7 @@
               <option value="bell">ベル</option>
               <option value="crystal">クリスタル</option>
             </select>
-              <button id="testSoundButton" class="test-button" type="button" aria-label="アラーム音を試聴" title="試聴">▶</button>
+              <button id="testSoundButton" class="test-button" type="button" aria-label="開始音を試聴" title="試聴">▶</button>
             </span>
           </label>
           <label class="compact-field">
