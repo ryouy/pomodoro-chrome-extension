@@ -8,6 +8,7 @@
   --line: #d6e3f2;
   --accent: #2b77c5;
   --accent-dark: #205f9d;
+  --complement: #d4883a;
   --break: #3a9b78;
 }
 
@@ -88,7 +89,15 @@ h1, h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
 .primary-button { border: 1px solid var(--accent); color: #fff; background: var(--accent); }
 .primary-button:hover { border-color: var(--accent-dark); background: var(--accent-dark); }
 .secondary-button { border: 1px solid var(--line); color: var(--ink); background: #fff; }
-.secondary-button:hover { background: var(--surface-soft); }
+.secondary-button.work-active {
+  border-color: color-mix(in srgb, var(--complement) 38%, var(--line));
+  background: color-mix(in srgb, var(--complement) 10%, var(--surface));
+}
+.secondary-button:not(:disabled):hover {
+  border-color: var(--complement);
+  color: var(--complement);
+  background: color-mix(in srgb, var(--complement) 16%, var(--surface));
+}
 .primary-actions .primary-button:disabled { cursor: default; opacity: .72; }
 .primary-actions .secondary-button:disabled { cursor: default; opacity: .4; }
 
@@ -106,9 +115,13 @@ h1, h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
   padding: 4px 14px;
   font-size: 11px;
   font-weight: 600;
-  opacity: .78;
+  opacity: .86;
 }
-.secondary-actions .text-button:hover { color: var(--ink); background: var(--surface-soft); opacity: 1; }
+.secondary-actions .text-button:hover {
+  color: var(--complement);
+  background: color-mix(in srgb, var(--complement) 9%, var(--surface));
+  opacity: 1;
+}
 .primary-actions button:focus-visible, .secondary-actions button:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
   outline-offset: 2px;
@@ -262,6 +275,7 @@ h1, h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
 
 .toggles-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .toggle { width: 34px; height: 19px; accent-color: var(--accent); }
+.notification-status { margin-left: 4px; color: var(--muted); font-size: 9px; font-weight: 500; }
 
 .save-button { width: 100%; margin-top: 12px; }
 

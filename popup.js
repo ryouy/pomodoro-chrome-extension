@@ -71,6 +71,7 @@ const elements = {
   themeOptions: document.querySelectorAll('input[name="theme"]'),
   soundEnabled: document.getElementById('soundEnabled'),
   notificationsEnabled: document.getElementById('notificationsEnabled'),
+  notificationStatus: document.getElementById('notificationStatus'),
   testSoundButton: document.getElementById('testSoundButton'),
   testBirdButton: document.getElementById('testBirdButton')
 };
@@ -97,12 +98,18 @@ function getRemainingSeconds(timer) {
   return Math.max(0, timer.remainingSeconds);
 }
 
+function getComplementColor(hexColor) {
+  const colorValue = Number.parseInt(hexColor.slice(1), 16);
+  return `#${(0xffffff - colorValue).toString(16).padStart(6, '0')}`;
+}
+
 function applyTheme(themeName = 'alpine') {
   const theme = THEMES[themeName] || THEMES.alpine;
   const root = document.documentElement;
   root.dataset.theme = themeName;
   root.style.setProperty('--accent', theme.accent);
   root.style.setProperty('--accent-dark', theme.accentDark);
+  root.style.setProperty('--complement', getComplementColor(theme.accent));
   root.style.setProperty('--break', theme.break);
   root.style.setProperty('--surface', theme.surface);
   root.style.setProperty('--surface-soft', theme.surfaceSoft);
@@ -125,6 +132,7 @@ function renderTimer() {
     : timer.status === 'complete' ? 'もう一度' : timer.status === 'paused' ? '再開' : 'スタート';
   elements.startPauseButton.disabled = timer.status === 'running';
   elements.pauseButton.disabled = timer.status !== 'running';
+  elements.pauseButton.classList.toggle('work-active', timer.status === 'running' && timer.phase === 'work');
   elements.skipButton.disabled = timer.status === 'complete';
 
   elements.phaseLabel.classList.toggle('break', timer.phase === 'break');
@@ -176,6 +184,19 @@ elements.themeOptions.forEach((option) => {
   option.addEventListener('change', (event) => {
     if (event.target.checked) applyTheme(event.target.value);
   });
+});
+
+elements.notificationsEnabled.addEventListener('change', async () => {
+  elements.notificationStatus.textContent = '';
+  if (!elements.notificationsEnabled.checked) return;
+
+  const response = await sendMessage({ type: 'TEST_NOTIFICATION' });
+  if (response?.ok) {
+    elements.notificationStatus.textContent = 'テスト送信済み';
+  } else {
+    elements.notificationsEnabled.checked = false;
+    elements.notificationStatus.textContent = '通知がブロックされています';
+  }
 });
 
 document.querySelectorAll('.step-button').forEach((button) => {

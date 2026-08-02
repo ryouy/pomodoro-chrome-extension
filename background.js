@@ -133,6 +133,9 @@ async function playBreakBirdSound(birdId = DEFAULT_SETTINGS.birdSound) {
 
 async function showNotification(title, message) {
   try {
+    const permission = await chrome.notifications.getPermissionLevel();
+    if (permission !== 'granted') return false;
+
     await chrome.notifications.create(`pomodoro-${Date.now()}`, {
       type: 'basic',
       iconUrl: 'icons/icon128.png',
@@ -141,8 +144,10 @@ async function showNotification(title, message) {
       priority: 2,
       silent: true
     });
+    return true;
   } catch (error) {
     console.error('通知を表示できませんでした。', error);
+    return false;
   }
 }
 
@@ -317,6 +322,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           endTime: null
         };
         await saveData(settings, nextTimer);
+        if (settings.soundEnabled) {
+          await playSound('pause-beep');
+        }
         sendResponse({ ok: true, timer: nextTimer });
         break;
       }
@@ -371,6 +379,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       case 'PLAY_BIRD_TEST_SOUND': {
         await playBreakBirdSound(message.birdId || settings.birdSound);
         sendResponse({ ok: true });
+        break;
+      }
+
+      case 'TEST_NOTIFICATION': {
+        const shown = await showNotification('通知テスト', 'タイマーの通知は正常に設定されています。');
+        sendResponse({ ok: shown, permissionGranted: shown });
         break;
       }
 

@@ -156,6 +156,11 @@ async function playBellTone(context) {
   scheduleBell(context, now + 0.28, 1046, 0.95, 0.11);
 }
 
+async function playPauseBeep(context) {
+  const now = context.currentTime + 0.02;
+  scheduleBell(context, now, 880, 0.16, 0.075);
+}
+
 async function playCrystal(context) {
   const now = context.currentTime + 0.03;
   scheduleTone(context, { time: now, frequency: 988, duration: 0.16, type: 'triangle', volume: 0.10, attack: 0.006 });
@@ -256,6 +261,9 @@ async function playSound(soundId) {
       break;
     case 'bell':
       await playBellTone(context);
+      break;
+    case 'pause-beep':
+      await playPauseBeep(context);
       break;
     case 'crystal':
       await playCrystal(context);
