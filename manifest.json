@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "シンプル・ポモドーロ",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "description": "シンプルなポモドーロタイマーです",
   "minimum_chrome_version": "116",
   "permissions": [

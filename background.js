@@ -81,6 +81,16 @@ async function updateBadge(settings, timer) {
       : `休憩中：セット ${setNumber}/${settings.totalSets}`;
   } else if (timer.status === 'complete') {
     title = `全${settings.totalSets}セット完了`;
+  } else if (completedSet >= settings.totalSets) {
+    isComplete = true;
+    nextTimer = {
+      status: 'complete',
+      phase: 'work',
+      currentSet: settings.totalSets,
+      remainingSeconds: 0,
+      endTime: null
+    };
+    await chrome.alarms.clear(TIMER_ALARM);
   } else {
     title = `準備完了：作業 セット ${setNumber}/${settings.totalSets}`;
   }
@@ -320,8 +330,20 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
       case 'UPDATE_SETTINGS': {
         const nextSettings = normalizeSettings(message.settings);
-        await chrome.alarms.clear(TIMER_ALARM);
-        const nextTimer = initialTimer(nextSettings);
+        const durationChanged = nextSettings.workMinutes !== settings.workMinutes
+          || nextSettings.breakMinutes !== settings.breakMinutes;
+        let nextTimer;
+
+        if (durationChanged) {
+          await chrome.alarms.clear(TIMER_ALARM);
+          nextTimer = initialTimer(nextSettings);
+        } else {
+          nextTimer = {
+            ...timer,
+            currentSet: Math.min(timer.currentSet, nextSettings.totalSets)
+          };
+        }
+
         await saveData(nextSettings, nextTimer);
         sendResponse({ ok: true, settings: nextSettings, timer: nextTimer });
         break;
