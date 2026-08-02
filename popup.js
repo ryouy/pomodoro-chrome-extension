@@ -192,7 +192,7 @@ elements.notificationsEnabled.addEventListener('change', async () => {
 
   const response = await sendMessage({ type: 'TEST_NOTIFICATION' });
   if (response?.ok) {
-    elements.notificationStatus.textContent = 'テスト送信済み';
+    elements.notificationStatus.textContent = '';
   } else {
     elements.notificationsEnabled.checked = false;
     elements.notificationStatus.textContent = '通知がブロックされています';
