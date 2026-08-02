@@ -76,7 +76,7 @@ h1, h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
 
 .set-label { margin-top: 12px; color: var(--muted); font-size: 12px; font-weight: 650; }
 
-.primary-actions { display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px; }
+.primary-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .primary-actions .primary-button, .primary-actions .secondary-button { width: 100%; }
 
 .primary-button, .secondary-button {
@@ -89,11 +89,30 @@ h1, h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
 .primary-button:hover { border-color: var(--accent-dark); background: var(--accent-dark); }
 .secondary-button { border: 1px solid var(--line); color: var(--ink); background: #fff; }
 .secondary-button:hover { background: var(--surface-soft); }
-.primary-actions button:disabled { cursor: default; opacity: .45; }
+.primary-actions .primary-button:disabled { cursor: default; opacity: .72; }
+.primary-actions .secondary-button:disabled { cursor: default; opacity: .4; }
 
-.secondary-actions { display: flex; justify-content: center; margin-top: 10px; }
-.secondary-actions .text-button { margin: 0; padding: 5px 14px; }
-.secondary-actions .text-button + .text-button { border-left: 1px solid var(--line); }
+.secondary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+.secondary-actions .text-button {
+  width: 100%;
+  min-height: 30px;
+  margin: 0;
+  border-radius: 8px;
+  padding: 4px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: .78;
+}
+.secondary-actions .text-button:hover { color: var(--ink); background: var(--surface-soft); opacity: 1; }
+.primary-actions button:focus-visible, .secondary-actions button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline-offset: 2px;
+}
 
 .settings-heading {
   display: flex;
