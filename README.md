@@ -1,5 +1,3 @@
-# シンプル・ポモドーロ
-
 集中と休憩を切り替えるChrome拡張機能
 
 ## Features
@@ -14,8 +12,4 @@
 2. Chromeで `chrome://extensions/` を開く
 3. デベロッパーモード」を有効にし、パッケージ化されていない拡張機能を読み込む」から展開したフォルダを選ぶ
 
-## Web
-
 ウェブ版は `web-app/` 
-
-Vercelで公開する場合は、Root Directoryを `web-app` に指定
